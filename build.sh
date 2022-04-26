@@ -56,9 +56,10 @@ _EOL_
     curl -s -X POST -d chat_id="${CHAT_ID}" -d parse_mode=Markdown -d text="${MESSAGE}" https://api.telegram.org/bot"${TOKEN}"/sendMessage
     ${MAKE_COMMAND} | tee "${ROM}"-build.log
     BUILD_PROGRESS=$(sed -n '/ ninja/,$p' "${ROM}"-build.log | grep -Po '\d+% \d+/\d+' | tail -n1 | sed -e 's/ / \(/' -e 's/$/)/')
-    
-    #Build Failed
+    finalzip="${OUT}/${ROMZIP}*.zip"
+
         if [ -f "${OUT}"/${ROMZIP}*.zip ]; then
+            filename="$(basename $finalzip)"
             # Build Succuss
             BUILD_END=$(date +"%s")
             DIFF=$((BUILD_END - BUILD_START))
@@ -87,6 +88,6 @@ if [ "$UPLOAD" = "true" ]; then
     zipdir=$(get_build_var PRODUCT_OUT)
     zippath=$(find "$zipdir"/"${ROMZIP}"*.zip | tail -n -1)
     rclone copy -P "$zippath" gdrive:roms
-    FOLDER_LINK="https://chiru.chiranth.workers.dev/2:/"
+    FOLDER_LINK="https://chiru.chiranth.workers.dev/2:/${filename}"
     curl -s -X POST -d chat_id="${CHAT_ID}" -d parse_mode=Markdown -d text="Build Succussfully Uploaded [Here](${FOLDER_LINK})" https://api.telegram.org/bot"${TOKEN}"/sendMessage
 fi
